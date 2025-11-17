@@ -1,0 +1,18 @@
+# ROS 2 colcon workspace specific
+/build/
+/install/
+/log/
+
+# Python
+*.pyc
+__pycache__/
+*.egg-info/
+
+# IDE specific
+.vscode/
+.idea/
+
+# Other
+*.swp
+*~
+.DS_Store
