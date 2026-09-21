@@ -1,0 +1,76 @@
+<root BTCPP_format="3" main_tree_to_execute="MainTree">
+  <!-- ////////// -->
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode name="NavigateRecovery" number_of_retries="6">
+      <!-- 메인 시퀀스 실패 시, 전체 코스트맵을 클리어하는 회복 동작을 순서대로 시도 -->
+      <RoundRobin name="RecoveryActions">
+        <ClearEntireCostmap name="ClearGlobalCostmap" service_name="global_costmap/clear_entirely_costmap"/>
+        <ClearEntireCostmap name="ClearLocalCostmap" service_name="local_costmap/clear_entirely_costmap"/>
+      </RoundRobin>
+      
+      <!-- 메인 로직: [1. 주행] -> [2. 관찰] 순서로 실행 -->
+      <Sequence name="MainSequence">
+        
+        <!-- 1. 목표 지점까지 주행하는 서브트리 -->
+        <PipelineSequence name="NavigateToGoal">
+          <RateController hz="1.0">
+            <RecoveryNode number_of_retries="1" name="ComputePathRecovery">
+              <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+              <!-- 경로 계산 실패 시 글로벌 코스트맵만 클리어 -->
+              <ClearEntireCostmap name="ClearGlobalCostmap" service_name="global_costmap/clear_entirely_costmap"/>
+            </RecoveryNode>
+          </RateController>
+          <RecoveryNode number_of_retries="1" name="FollowPathRecovery">
+            <FollowPath path="{path}" controller_id="FollowPath"/>
+            <!-- 경로 추종 실패 시 로컬 코스트맵만 클리어 -->
+            <ClearEntireCostmap name="ClearLocalCostmap" service_name="local_costmap/clear_entirely_costmap"/>
+          </RecoveryNode>
+        </PipelineSequence>
+
+        <!-- 2. 도착 후 주변을 관찰하는 서브트리 -->
+        <Sequence name="ObserveSurroundings">
+          <BackUp name="MoveBack" backup_dist="0.3" backup_speed="0.05"/>
+          <Spin name="Scan360" spin_dist="6.28"/> <!-- 360도 회전 (라디안) -->
+          <Wait name="ObserveWait" wait_duration="5.0"/>
+        </Sequence>
+
+      </Sequence>
+    </RecoveryNode>
+  </BehaviorTree>
+
+  <!-- ////////// -->
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BackUp" editable="true">
+      <input_port name="backup_dist"/>
+      <input_port name="backup_speed"/>
+    </Action>
+    <Action ID="ClearEntireCostmap" editable="true">
+      <input_port name="service_name"/>
+    </Action>
+    <Action ID="ComputePathToPose" editable="true">
+      <input_port name="goal"/>
+      <output_port name="path"/>
+      <input_port name="planner_id"/>
+    </Action>
+    <Action ID="FollowPath" editable="true">
+      <input_port name="path"/>
+      <input_port name="controller_id"/>
+    </Action>
+    <Action ID="Spin" editable="true">
+      <input_port name="spin_dist"/>
+    </Action>
+    <Action ID="Wait" editable="true">
+      <input_port name="wait_duration"/>
+    </Action>
+    <Control ID="PipelineSequence" editable="true"/>
+    <Decorator ID="RateController" editable="true">
+      <input_port name="hz"/>
+    </Decorator>
+    <Control ID="RecoveryNode" editable="true">
+      <input_port name="number_of_retries"/>
+    </Control>
+    <Control ID="RoundRobin" editable="true"/>
+  </TreeNodesModel>
+
+</root>

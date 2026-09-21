@@ -1,0 +1,32 @@
+# ---- colcon build artifacts ----
+/build/
+/install/
+/log/
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.egg-info/
+
+# ---- IDE / editor ----
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# ---- 대용량 Gazebo 모델 (741MB, GitHub 100MB 제한 초과) ----
+# 별도 보관: models.zip / ros2_project_ws.tar.gz
+src/my_project_pkg/models/
+
+# ---- 학습 가중치 (바이너리) ----
+*.pt
+*.pth
+*.onnx
+
+# ---- 백업/사본 파일 ----
+*.bak
+*.backup
+*backup*.py
+*(사본)*
+/src/src/

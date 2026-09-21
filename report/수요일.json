@@ -1,0 +1,32 @@
+{
+  "results": [
+    {
+      "waypoint": 1,
+      "final": {
+        "can": 0,
+        "box": 0
+      }
+    },
+    {
+      "waypoint": 2,
+      "final": {
+        "can": 1,
+        "box": 0
+      }
+    },
+    {
+      "waypoint": 3,
+      "final": {
+        "can": 1,
+        "box": 1
+      }
+    },
+    {
+      "waypoint": 4,
+      "final": {
+        "can": 0,
+        "box": 0
+      }
+    }
+  ]
+}

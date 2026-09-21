@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "waypoint": 1,
+      "left": {
+        "can": 0,
+        "box": 0
+      },
+      "right": {
+        "can": 1,
+        "box": 0
+      },
+      "final": {
+        "can": 1,
+        "box": 0
+      }
+    },
+    {
+      "waypoint": 2,
+      "left": {
+        "can": 1,
+        "box": 0
+      },
+      "right": {
+        "can": 2,
+        "box": 0
+      },
+      "final": {
+        "can": 3,
+        "box": 0
+      }
+    },
+    {
+      "waypoint": 3,
+      "left": {
+        "can": 2,
+        "box": 0
+      },
+      "right": {
+        "can": 0,
+        "box": 0
+      },
+      "final": {
+        "can": 2,
+        "box": 0
+      }
+    },
+    {
+      "waypoint": 4,
+      "left": {
+        "can": 0,
+        "box": 0
+      },
+      "right": {
+        "can": 0,
+        "box": 0
+      },
+      "final": {
+        "can": 0,
+        "box": 0
+      }
+    }
+  ]
+}

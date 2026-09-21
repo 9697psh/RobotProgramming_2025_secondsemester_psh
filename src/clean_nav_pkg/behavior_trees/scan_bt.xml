@@ -1,0 +1,56 @@
+<!--
+  Behavior Tree to navigate to a pose and then perform a scanning motion.
+  1. Navigates to the goal pose.
+  2. Rotates left by 60 degrees.
+  3. Rotates right by 60 degrees (back to original orientation).
+  4. Rotates right by 60 degrees again.
+  5. Rotates left by 60 degrees (back to original orientation).
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <!-- Navigate to the goal pose with recovery mechanisms -->
+      <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+        <PipelineSequence name="NavigateWithReplanning">
+          <RateController hz="1.0">
+            <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+              <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+            </RecoveryNode>
+          </RateController>
+          <RecoveryNode number_of_retries="1" name="FollowPath">
+            <FollowPath path="{path}" controller_id="FollowPath"/>
+            <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+          </RecoveryNode>
+        </PipelineSequence>
+        <ReactiveFallback name="RecoveryFallback">
+          <GoalUpdated/>
+          <RoundRobin name="RecoveryActions">
+            <Sequence name="ClearingActions">
+              <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+            </Sequence>
+            <Spin spin_dist="1.57"/>
+            <Wait wait_duration="5"/>
+            <BackUp backup_dist="0.30" backup_speed="0.05"/>
+          </RoundRobin>
+        </ReactiveFallback>
+      </RecoveryNode>
+      
+      <!-- 
+        The robot has arrived. Pause for a second to ensure it's stable.
+        The project_controller will now take over, change the state to SCANNING,
+        wait for the scan to complete, and then send a signal to the patrol
+        component to continue. This BT does not need to handle the scanning logic itself.
+      -->
+      <Wait wait_duration="1.0" />
+      <!-- Rotation sequence: Left 45, Back to original (Right 45), Right 45 -->
+      <Sequence name="ScanRotations">
+        <Spin spin_dist="0.5236" />   <!-- Rotate 45 degrees left -->
+        <Spin spin_dist="-0.5236" />  <!-- Rotate 45 degrees right (back to original) -->
+        <Spin spin_dist="-0.5236" />  <!-- Rotate 45 degrees right again -->
+        <Spin spin_dist="0.5236" />   <!-- Rotate 45 degrees left (back to original) -->
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+</root>
